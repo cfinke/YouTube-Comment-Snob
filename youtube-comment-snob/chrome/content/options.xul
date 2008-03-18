@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<prefwindow
+	title="YouTube Comment Snob - Options"
+	buttons="accept,cancel"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<prefpane id="general-pane" label="YouTube Comment Snob - Options">
+		<preferences>
+			<preference id="extensions.youtube-comment-snob.mistakes" name="extensions.youtube-comment-snob.mistakes" type="int" />
+			<preference id="extensions.youtube-comment-snob.allcaps" name="extensions.youtube-comment-snob.allcaps" type="bool" />
+			<preference id="extensions.youtube-comment-snob.nocaps" name="extensions.youtube-comment-snob.nocaps" type="bool" />
+			<preference id="extensions.youtube-comment-snob.startsWithCapital" name="extensions.youtube-comment-snob.startsWithCapital" type="bool" />
+			<preference id="extensions.youtube-comment-snob.punctuation" name="extensions.youtube-comment-snob.punctuation" type="bool" />
+			<preference id="extensions.youtube-comment-snob.excessiveCapitals" name="extensions.youtube-comment-snob.excessiveCapitals" type="bool" />
+			<preference id="extensions.youtube-comment-snob.dictionary" name="extensions.youtube-comment-snob.dictionary" type="string" />
+		</preferences>
+		<groupbox>
+			<hbox>
+				<label value="Hide comments with " /><textbox preference="extensions.youtube-comment-snob.mistakes" size="3"/><label value=" or more spelling mistakes." />
+			</hbox>			
+			<checkbox preference="extensions.youtube-comment-snob.nocaps" label="Hide comments that have no capital letters." />
+			<checkbox preference="extensions.youtube-comment-snob.allcaps" label="Hide comments that have only capital letters." />
+			<checkbox preference="extensions.youtube-comment-snob.startsWithCapital" label="Hide comments that do not start with a capital letter." />
+			<checkbox preference="extensions.youtube-comment-snob.punctuation" label="Hide comments that have excessive punctuation. (!!!!! ?????)" />
+			<checkbox preference="extensions.youtube-comment-snob.excessiveCapitals" label="Hide comments that have excessive capitalization." />			
+		</groupbox>
+		<groupbox>
+			<hbox>
+				<label value="Dictionary: " /><textbox preference="extensions.youtube-comment-snob.dictionary" size="5" />
+			</hbox>
+		</groupbox>
+	</prefpane>
+</prefwindow>

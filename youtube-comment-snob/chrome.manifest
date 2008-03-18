@@ -1,0 +1,8 @@
+content     youtube-comment-snob     jar:chrome/youtube-comment-snob.jar!/content/
+skin        youtube-comment-snob     classic             jar:chrome/youtube-comment-snob.jar!/skin/
+
+locale      youtube-comment-snob     en-US               jar:chrome/youtube-comment-snob.jar!/locale/en-US/
+
+overlay     chrome://browser/content/browser.xul                chrome://youtube-comment-snob/content/overlay.xul
+
+style		chrome://youtube-comment-snob/content/options.xul	chrome://global/skin/global.css
