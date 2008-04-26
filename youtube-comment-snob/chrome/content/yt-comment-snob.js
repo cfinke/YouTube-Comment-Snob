@@ -7,9 +7,16 @@ var YT_COMMENT_SNOB = {
 	get excessiveCapitals() { return YT_COMMENT_SNOB.prefs.getBoolPref("excessiveCapitals"); },
 	
 	get dict() {
-		var d = Components.classes["@mozilla.org/spellchecker/myspell;1"].getService(Components.interfaces.mozISpellCheckingEngine); 
-		d.dictionary = YT_COMMENT_SNOB.prefs.getCharPref("dictionary");
-		return d;
+		var spellclass = "@mozilla.org/spellchecker/myspell;1";
+		if ("@mozilla.org/spellchecker/hunspell;1" in Components.classes)
+			spellclass = "@mozilla.org/spellchecker/hunspell;1";
+		if ("@mozilla.org/spellchecker/engine;1" in Components.classes)
+			spellclass = "@mozilla.org/spellchecker/engine;1";
+			
+		var spellchecker = Components.classes[spellclass].createInstance(Components.interfaces.mozISpellCheckingEngine);
+		spellchecker.dictionary = YT_COMMENT_SNOB.prefs.getCharPref("dictionary");
+		
+		return spellchecker;
 	},
 	
 	latestPage : null,
@@ -53,7 +60,7 @@ var YT_COMMENT_SNOB = {
 	filterComments : function (page) {
 		if (!page) page = this.latestPage;
 		
-		var commentNodes = page.evaluate("//div[contains(concat(' ',@class, ' '), ' commentBody ')]", page, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+		var commentNodes = page.evaluate("//div[contains(concat(' ',@class, ' '), ' watch-comment-body ')]", page, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 		var comment = commentNodes.iterateNext();
 		var comments = [];
 		var mistakes = 0;
@@ -67,7 +74,7 @@ var YT_COMMENT_SNOB = {
 			mistakes = 0;
 			comment = comments[i];
 			
-			var commentNode = comment.parentNode.parentNode.parentNode;
+			var commentNode = comment.parentNode.parentNode;
 			var topNode = commentNode.parentNode;
 			
 			var originalText = comment.innerHTML.replace(/<[^>]+>/gm, " ").replace(/^\s+|\s+$/mg, "");
@@ -118,15 +125,18 @@ var YT_COMMENT_SNOB = {
 			}
 			
 			if (reason != ''){
-				commentNode.style.display = 'none';
-				topNode.insertBefore(this.createPlaceholder(page, commentNode.id, reason), commentNode);
+				if (commentNode.id) {
+					commentNode.style.display = 'none';
+					topNode.insertBefore(this.createPlaceholder(page, commentNode.id, reason), commentNode);
+				}
 			}
 		}
 	},
 	
 	createPlaceholder : function (page, id, reason) {
 		var el = page.createElement("div");
-		el.innerHTML = '<div class="commentEntry"><div class="commentHead">	<div class="floatL"><b>Comment hidden</b> (' + reason + ')</div>				<div class="floatR"><a href="javascript:void(0);" onclick="document.getElementById(\''+id+'\').style.display = \'\'; this.parentNode.parentNode.style.display = \'none\';">Show comment</a></div>				<div class="clear"></div>			</div>		</div>';
+		el.setAttribute("class", "watch-comment-head watch-comment-marked-spam smallText opacity30");
+		el.innerHTML = 'Comment hidden (' + reason + ') <a class="eLink smallText" href="javascript:void(0);" onclick="if (document.getElementById(\''+id+'\').style.display == \'\') { document.getElementById(\''+id+'\').style.display = \'none\'; this.innerHTML = \'Show\';} else { document.getElementById(\''+id+'\').style.display = \'\'; this.innerHTML = \'Hide\';}">Show</a>';
 		
 		return el;
 	}

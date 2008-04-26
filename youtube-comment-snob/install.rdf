@@ -4,16 +4,16 @@
          xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <RDF:Description RDF:about="rdf:#$gMZDy2"
                    em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-                   em:minVersion="1.5"
-                   em:maxVersion="3.0b4" />
+                   em:minVersion="2.0"
+                   em:maxVersion="3.0pre" />
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="youtube-comment-snob@efinke.com"
                    em:name="YouTube Comment Snob"
-                   em:version="1.0.2"
+                   em:version="1.1"
                    em:description="Filters out undesirable comments from YouTube comment threads."
                    em:creator="Christopher Finke"
-                   em:homepageURL="http://www.chrisfinke.com/addons/youtube-comment-snob/"
-                   em:updateURL="http://www.chrisfinke.com/files/updaters/youtube-comment-snob.rdf">
+                   em:optionsURL="chrome://youtube-comment-snob/content/options.xul"
+                   em:homepageURL="http://www.chrisfinke.com/addons/youtube-comment-snob/">
     <em:targetApplication RDF:resource="rdf:#$gMZDy2"/>
     <em:targetApplication RDF:resource="rdf:#$lMZDy2"/>
   </RDF:Description>
