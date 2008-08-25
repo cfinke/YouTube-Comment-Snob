@@ -9,7 +9,7 @@ function logTubeFilterMsg(message) {
 
 YT_COMMENT_SNOB_LISTENER.prototype = {
 	observe : function (subject, topic, data) {
-		if (!Components || (typeof Components == 'undefined')) return;
+		if ((typeof Components == 'undefined') || !Components) return;
 		
 		var request = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
 		
