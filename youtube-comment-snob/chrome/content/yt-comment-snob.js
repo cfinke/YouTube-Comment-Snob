@@ -123,7 +123,7 @@ var YT_COMMENT_SNOB = {
 					}
 				}
 				
-				if (mistakes >= this.maxMistakes) {
+				if (mistakes >= this.maxMistakes || mistakes == words.length) {
 					reason = mistakes + " spelling error";
 					if (mistakes != 1) reason += "s";
 				}
