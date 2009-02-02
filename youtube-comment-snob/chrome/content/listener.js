@@ -30,4 +30,4 @@ YT_COMMENT_SNOB_LISTENER.prototype = {
 	}
 };
 
-var ob = new YT_COMMENT_SNOB_LISTENER();
+var yt_comment_snob_ob = new YT_COMMENT_SNOB_LISTENER();
