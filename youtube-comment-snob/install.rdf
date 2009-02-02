@@ -5,20 +5,25 @@
   <RDF:Description RDF:about="rdf:#$gMZDy2"
                    em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
                    em:minVersion="2.0"
-                   em:maxVersion="3.0.*" />
+                   em:maxVersion="3.1b2pre" />
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="youtube-comment-snob@efinke.com"
                    em:name="YouTube Comment Snob"
-                   em:version="1.2"
+                   em:version="1.3"
                    em:description="Filters out undesirable comments from YouTube comment threads."
                    em:creator="Christopher Finke"
                    em:optionsURL="chrome://youtube-comment-snob/content/options.xul"
                    em:homepageURL="http://www.chrisfinke.com/addons/youtube-comment-snob/">
     <em:targetApplication RDF:resource="rdf:#$gMZDy2"/>
     <em:targetApplication RDF:resource="rdf:#$lMZDy2"/>
+    <em:targetApplication RDF:resource="rdf:#$qMZDy2"/>
   </RDF:Description>
-  <RDF:Description RDF:about="rdf:#$lMZDy2"
-                   em:id="{a463f10c-3994-11da-9945-000d60ca027b}"
-                   em:minVersion="1.0"
-                   em:maxVersion="1.2.*" />
+  <RDF:Description RDF:about="rdf:#$qMZDy2"
+                   em:id="{a23983c0-fd0e-11dc-95ff-0800200c9a66}"
+                   em:minVersion="0.1"
+                   em:maxVersion="1.0.*" />
+				  <RDF:Description RDF:about="rdf:#$lMZDy2"
+				                   em:id="{a463f10c-3994-11da-9945-000d60ca027b}"
+				                   em:minVersion="1.0"
+				                   em:maxVersion="2.*" />
 </RDF:RDF>
