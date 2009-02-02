@@ -14,6 +14,12 @@ var YT_COMMENT_SNOB = {
 	prefs : null,
 	
 	load : function () {
+		var appcontent = document.getElementById("content");
+
+		if (appcontent) {
+			appcontent.addEventListener("DOMContentLoaded", function (event) { YT_COMMENT_SNOB.DOMContentLoaded(event); }, false);
+		}
+		
 		this.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.youtube-comment-snob.");
 		
 		var spellclass = "@mozilla.org/spellchecker/myspell;1";
@@ -153,9 +159,3 @@ var YT_COMMENT_SNOB = {
 };
 
 addEventListener("load", function (event) { YT_COMMENT_SNOB.load(); }, false);
-
-var appcontent = document.getElementById("appcontent");
-
-if (appcontent) {
-	appcontent.addEventListener("DOMContentLoaded", function (event) { YT_COMMENT_SNOB.DOMContentLoaded(event); }, false);
-}
