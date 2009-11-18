@@ -14,13 +14,19 @@ var YT_COMMENT_SNOB = {
 	prefs : null,
 	
 	load : function () {
-		var appcontent = document.getElementById("content");
+		var firefoxBrowser = document.getElementById("appcontent");
 
-		if (appcontent) {
-			appcontent.addEventListener("DOMContentLoaded", function (event) { YT_COMMENT_SNOB.DOMContentLoaded(event); }, false);
+		if (firefoxBrowser) {
+			firefoxBrowser.addEventListener("DOMContentLoaded", YT_COMMENT_SNOB.DOMContentLoaded, false);
 		}
 		
-		this.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.youtube-comment-snob.");
+		var fennecBrowser = document.getElementById("browsers");
+		
+		if (fennecBrowser) {
+			fennecBrowser.addEventListener("load", YT_COMMENT_SNOB.DOMContentLoaded, true);
+		}
+		
+		YT_COMMENT_SNOB.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.youtube-comment-snob.");
 		
 		var spellclass = "@mozilla.org/spellchecker/myspell;1";
 		if ("@mozilla.org/spellchecker/hunspell;1" in Components.classes)
@@ -29,16 +35,30 @@ var YT_COMMENT_SNOB = {
 			spellclass = "@mozilla.org/spellchecker/engine;1";
 			
 		var spellchecker = Components.classes[spellclass].createInstance(Components.interfaces.mozISpellCheckingEngine);
-		spellchecker.dictionary = this.prefs.getCharPref("dictionary");
+		spellchecker.dictionary = YT_COMMENT_SNOB.prefs.getCharPref("dictionary");
 		
-		this.dict = spellchecker;
+		YT_COMMENT_SNOB.dict = spellchecker;
+	},
+	
+	unload : function () {
+		var firefoxBrowser = document.getElementById("appcontent");
+
+		if (firefoxBrowser) {
+			firefoxBrowser.removeEventListener("DOMContentLoaded", YT_COMMENT_SNOB.DOMContentLoaded, false);
+		}
+		
+		var fennecBrowser = document.getElementById("browsers");
+		
+		if (fennecBrowser) {
+			fennecBrowser.removeEventListener("load", YT_COMMENT_SNOB.DOMContentLoaded, true);
+		}
 	},
 	
 	DOMContentLoaded : function (event) {
 		try {
 			var page = event.target;
 			if (page.location.host.match(/youtube/)) {
-				this.filterComments(page);
+				YT_COMMENT_SNOB.filterComments(page);
 			}
 		} catch (e) {
 			return;
@@ -46,25 +66,44 @@ var YT_COMMENT_SNOB = {
 	},
 	
 	getTabFromId : function (id) {
-		var num = gBrowser.browsers.length;
 		var re = new RegExp(id, "i");
 		
-		for (var i = 0; i < num; i++) {
-			var b = gBrowser.getBrowserAtIndex(i);
+		if (typeof gBrowser != 'undefined') {
+			var num = gBrowser.browsers.length;
+		
+			for (var i = 0; i < num; i++) {
+				var b = gBrowser.getBrowserAtIndex(i);
 			
-			try {
-				if (b.currentURI.spec.match(re)) {
-					this.latestPage = b.contentDocument;
-					setTimeout('YT_COMMENT_SNOB.filterComments();', 500);
+				try {
+					if (b.currentURI.spec.match(re)) {
+						YT_COMMENT_SNOB.latestPage = b.contentDocument;
+						setTimeout('YT_COMMENT_SNOB.filterComments();', 500);
+					}
+				} catch(e) {
+					alert(e);
 				}
-			} catch(e) {
-				alert(e);
+			}
+		}
+		else {
+			var browsers = Browser.browsers;
+			
+			for (var i = 0; i < browsers.length; i++) {
+				var b = browsers[i];
+				
+				try {
+					if (b.currentURI.spec.match(re)) {
+						YT_COMMENT_SNOB.latestPage = b.contentDocument;
+						setTimeout('YT_COMMENT_SNOB.filterComments();', 500);
+					}
+				} catch(e) {
+					alert(e);
+				}
 			}
 		}
 	},
 	
 	filterComments : function (page) {
-		if (!page) page = this.latestPage;
+		if (!page) page = YT_COMMENT_SNOB.latestPage;
 		
 		var commentNodes = page.evaluate("//div[@class='watch-comment-body']", page, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 		var comment = commentNodes.iterateNext();
@@ -87,22 +126,22 @@ var YT_COMMENT_SNOB = {
 			
 			var reason = '';
 			
-			if (this.allcaps && !originalText.match(/[a-z]/m)){
+			if (YT_COMMENT_SNOB.allcaps && !originalText.match(/[a-z]/m)){
 				reason = "All capital letters";
 			}
-			else if (this.nocaps && !originalText.match(/[A-Z]/m)){
+			else if (YT_COMMENT_SNOB.nocaps && !originalText.match(/[A-Z]/m)){
 				reason = "No capital letters";
 			}
-			else if (this.startsWithCapital && originalText.match(/^[a-z]/m)){
+			else if (YT_COMMENT_SNOB.startsWithCapital && originalText.match(/^[a-z]/m)){
 				reason = "Doesn't start with a capital letter.";
 			}
-			else if (this.punctuation && originalText.match(/(!{2,})|(\?{3,})/m)){
+			else if (YT_COMMENT_SNOB.punctuation && originalText.match(/(!{2,})|(\?{3,})/m)){
 				reason = "Excessive punctuation.";
 			}
-			else if (this.excessiveCapitals && originalText.match(/[A-Z]{5,}/m)){
+			else if (YT_COMMENT_SNOB.excessiveCapitals && originalText.match(/[A-Z]{5,}/m)){
 				reason = "Excessive capitalization.";
 			}
-			else if (this.profanity && originalText.match(/\b(ass(hole)?\b|bitch|cunt|damn|fuc[kc]|(bull)?shits?\b|fag|nigger|nigga)/i)) {
+			else if (YT_COMMENT_SNOB.profanity && originalText.match(/\b(ass(hole)?\b|bitch|cunt|damn|fuc[kc]|(bull)?shits?\b|fag|nigger|nigga)/i)) {
 				reason = "Profanity.";
 			}
 			else {
@@ -115,7 +154,7 @@ var YT_COMMENT_SNOB = {
 				words = text.split(" ");
 
 				for (var j = 0; j < words.length; j++){
-					if (!this.dict.check(words[j])){
+					if (!YT_COMMENT_SNOB.dict.check(words[j])){
 						if (
 							(words[j].charAt(0) === words[j].charAt(0).toUpperCase()) &&
 							(words[j].substring(1) === words[j].substring(1).toLowerCase())
@@ -129,7 +168,7 @@ var YT_COMMENT_SNOB = {
 					}
 				}
 				
-				if (mistakes >= this.maxMistakes || mistakes == words.length) {
+				if (mistakes >= YT_COMMENT_SNOB.maxMistakes || mistakes == words.length) {
 					reason = mistakes + " spelling error";
 					if (mistakes != 1) reason += "s";
 				}
@@ -143,7 +182,7 @@ var YT_COMMENT_SNOB = {
 				
 				if (commentNode.id) {
 					commentNode.style.display = 'none';
-					topNode.insertBefore(this.createPlaceholder(page, commentNode.id, reason), commentNode);
+					topNode.insertBefore(YT_COMMENT_SNOB.createPlaceholder(page, commentNode.id, reason), commentNode);
 				}
 			}
 		}
@@ -158,4 +197,5 @@ var YT_COMMENT_SNOB = {
 	}
 };
 
-addEventListener("load", function (event) { YT_COMMENT_SNOB.load(); }, false);
+addEventListener("load", YT_COMMENT_SNOB.load, false);
+addEventListener("unload", YT_COMMENT_SNOB.unload, false);

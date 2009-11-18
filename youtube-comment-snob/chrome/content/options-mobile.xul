@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<setting id="extensions.youtube-comment-snob.mistakes" pref="extensions.youtube-comment-snob.mistakes" type="int" title="Hide comments with more than X mistakes:" />
+	<setting id="extensions.youtube-comment-snob.profanity" pref="extensions.youtube-comment-snob.profanity" type="bool" title="Hide comments that include profanity." />
+	<setting id="extensions.youtube-comment-snob.allcaps" pref="extensions.youtube-comment-snob.allcaps" type="bool" title="Hide comments that have only capital letters." />
+	<setting id="extensions.youtube-comment-snob.nocaps" pref="extensions.youtube-comment-snob.nocaps" type="bool" title="Hide comments that have no capital letters." />
+	<setting id="extensions.youtube-comment-snob.startsWithCapital" pref="extensions.youtube-comment-snob.startsWithCapital" type="bool"  title="Hide comments that do not start with a capital letter." />
+	<setting id="extensions.youtube-comment-snob.punctuation" pref="extensions.youtube-comment-snob.punctuation" type="bool" title="Hide comments that have excessive punctuation. (!!!!! ?????)" />
+	<setting id="extensions.youtube-comment-snob.excessiveCapitals" pref="extensions.youtube-comment-snob.excessiveCapitals" type="bool" title="Hide comments that have excessive capitalization." />
+	<setting id="extensions.youtube-comment-snob.dictionary" pref="extensions.youtube-comment-snob.dictionary" type="string" title="Dictionary:" />
+</vbox>
