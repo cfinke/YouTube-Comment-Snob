@@ -13,6 +13,7 @@
 			<preference id="extensions.youtube-comment-snob.excessiveCapitals" name="extensions.youtube-comment-snob.excessiveCapitals" type="bool" />
 			<preference id="extensions.youtube-comment-snob.dictionary" name="extensions.youtube-comment-snob.dictionary" type="string" />
 			<preference id="extensions.youtube-comment-snob.profanity" name="extensions.youtube-comment-snob.profanity" type="bool" />
+			<preference id="extensions.youtube-comment-snob.extreme" name="extensions.youtube-comment-snob.extreme" type="bool" />
 		</preferences>
 		<groupbox>
 			<hbox>
@@ -23,7 +24,8 @@
 			<checkbox preference="extensions.youtube-comment-snob.startsWithCapital" label="Hide comments that do not start with a capital letter." />
 			<checkbox preference="extensions.youtube-comment-snob.punctuation" label="Hide comments that have excessive punctuation. (!!!!! ?????)" />
 			<checkbox preference="extensions.youtube-comment-snob.excessiveCapitals" label="Hide comments that have excessive capitalization." />			
-			<checkbox preference="extensions.youtube-comment-snob.profanity" label="Hide comments that include profanity." />			
+			<checkbox preference="extensions.youtube-comment-snob.profanity" label="Hide comments that include profanity." />
+			<checkbox preference="extensions.youtube-comment-snob.extreme" label="Hide all YouTube comments" />
 		</groupbox>
 		<groupbox>
 			<vbox>

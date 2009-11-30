@@ -6,6 +6,7 @@ var YT_COMMENT_SNOB = {
 	get punctuation() { return YT_COMMENT_SNOB.prefs.getBoolPref("punctuation"); },
 	get excessiveCapitals() { return YT_COMMENT_SNOB.prefs.getBoolPref("excessiveCapitals"); },
 	get profanity() { return YT_COMMENT_SNOB.prefs.getBoolPref("profanity"); },
+	get extreme() { return YT_COMMENT_SNOB.prefs.getBoolPref("extreme"); },
 	
 	dict : null,
 	
@@ -105,84 +106,99 @@ var YT_COMMENT_SNOB = {
 	filterComments : function (page) {
 		if (!page) page = YT_COMMENT_SNOB.latestPage;
 		
-		var commentNodes = page.evaluate("//div[@class='watch-comment-body']", page, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-		var comment = commentNodes.iterateNext();
-		var comments = [];
-		var mistakes = 0;
-		
-		while (comment) {
-			comments.push(comment);
-			comment = commentNodes.iterateNext();
+		if (YT_COMMENT_SNOB.extreme) {
+			var comments = page.getElementById("watch-comment-panel");
+			
+			if (comments) {
+				comments.parentNode.removeChild(comments);
+			}
+			
+			var all_comments = page.getElementById("comment-video-info");
+			
+			if (all_comments) {
+				all_comments.parentNode.removeChild(all_comments);
+			}
 		}
+		else {
+			var commentNodes = page.evaluate("//div[@class='watch-comment-body']", page, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+			var comment = commentNodes.iterateNext();
+			var comments = [];
+			var mistakes = 0;
 		
-		for (var i = 0; i < comments.length; i++){
-			mistakes = 0;
-			comment = comments[i];
+			while (comment) {
+				comments.push(comment);
+				comment = commentNodes.iterateNext();
+			}
+		
+			for (var i = 0; i < comments.length; i++){
+				mistakes = 0;
+				comment = comments[i];
 			
-			var commentNode = comment.parentNode.parentNode;
-			var topNode = commentNode.parentNode;
+				var commentNode = comment.parentNode.parentNode;
+				var topNode = commentNode.parentNode;
 			
-			var originalText = comment.innerHTML.replace(/<[^>]+>/gm, " ").replace(/^\s+|\s+$/mg, "");
+				var originalText = comment.innerHTML.replace(/<[^>]+>/gm, " ").replace(/^\s+|\s+$/mg, "");
 			
-			var reason = '';
+				var reason = '';
 			
-			if (YT_COMMENT_SNOB.allcaps && !originalText.match(/[a-z]/m)){
-				reason = "All capital letters";
-			}
-			else if (YT_COMMENT_SNOB.nocaps && !originalText.match(/[A-Z]/m)){
-				reason = "No capital letters";
-			}
-			else if (YT_COMMENT_SNOB.startsWithCapital && originalText.match(/^[a-z]/m)){
-				reason = "Doesn't start with a capital letter.";
-			}
-			else if (YT_COMMENT_SNOB.punctuation && originalText.match(/(!{2,})|(\?{3,})/m)){
-				reason = "Excessive punctuation.";
-			}
-			else if (YT_COMMENT_SNOB.excessiveCapitals && originalText.match(/[A-Z]{5,}/m)){
-				reason = "Excessive capitalization.";
-			}
-			else if (YT_COMMENT_SNOB.profanity && originalText.match(/\b(ass(hole)?\b|bitch|cunt|damn|fuc[kc]|(bull)?shits?\b|fag|nigger|nigga)/i)) {
-				reason = "Profanity.";
-			}
-			else {
-				var text = originalText;
+				if (YT_COMMENT_SNOB.allcaps && !originalText.match(/[a-z]/m)){
+					reason = "All capital letters";
+				}
+				else if (YT_COMMENT_SNOB.nocaps && !originalText.match(/[A-Z]/m)){
+					reason = "No capital letters";
+				}
+				else if (YT_COMMENT_SNOB.startsWithCapital && originalText.match(/^[a-z]/m)){
+					reason = "Doesn't start with a capital letter.";
+				}
+				else if (YT_COMMENT_SNOB.punctuation && originalText.match(/(!{2,})|(\?{3,})/m)){
+					reason = "Excessive punctuation.";
+				}
+				else if (YT_COMMENT_SNOB.excessiveCapitals && originalText.match(/[A-Z]{5,}/m)){
+					reason = "Excessive capitalization.";
+				}
+				else if (YT_COMMENT_SNOB.profanity && originalText.match(/\b(ass(hole)?\b|bitch|cunt|damn|fuc[kc]|(bull)?shits?\b|fag|nigger|nigga)/i)) {
+					reason = "Profanity.";
+				}
+				else {
+					var text = originalText;
 
-				text = text.replace(/\s/mg, " ");
-				text = text.replace(/\s+|[^a-z0-9\-']/img, " ");
-				text = text.replace(/^\s+|\s+$/mg, "");
+					text = text.replace(/\s/mg, " ");
+					text = text.replace(/\s+|[^a-z0-9\-']/img, " ");
+					text = text.replace(/^\s+|\s+$/mg, "");
 
-				words = text.split(" ");
+					words = text.split(" ");
 
-				for (var j = 0; j < words.length; j++){
-					if (!YT_COMMENT_SNOB.dict.check(words[j])){
-						if (
-							(words[j].charAt(0) === words[j].charAt(0).toUpperCase()) &&
-							(words[j].substring(1) === words[j].substring(1).toLowerCase())
-						)
-						{
-								// Probably a name.
-						}
-						else {
-							mistakes++;
+					for (var j = 0; j < words.length; j++){
+						if (!YT_COMMENT_SNOB.dict.check(words[j])){
+							if (
+								(words[j].charAt(0) === words[j].charAt(0).toUpperCase()) &&
+								(words[j].substring(1) === words[j].substring(1).toLowerCase())
+							)
+							{
+									// Probably a name.
+							}
+							else {
+								mistakes++;
+							}
 						}
 					}
-				}
 				
-				if (mistakes >= YT_COMMENT_SNOB.maxMistakes || mistakes == words.length) {
-					reason = mistakes + " spelling error";
-					if (mistakes != 1) reason += "s";
+					if (mistakes >= YT_COMMENT_SNOB.maxMistakes || mistakes == words.length) {
+						reason = mistakes + " spelling error";
+						if (mistakes != 1) reason += "s";
+					}
 				}
-			}
 			
-			if (reason != ''){
-				if (!commentNode.id) {
-					commentNode = topNode;
-					topNode = commentNode.parentNode;
-				}
+				if (reason != ''){
+					if (!commentNode.id) {
+						commentNode = topNode;
+						topNode = commentNode.parentNode;
+					}
 				
-				if (commentNode.id) {
-					commentNode.style.display = 'none';
-					topNode.insertBefore(YT_COMMENT_SNOB.createPlaceholder(page, commentNode.id, reason), commentNode);
+					if (commentNode.id) {
+						commentNode.style.display = 'none';
+						topNode.insertBefore(YT_COMMENT_SNOB.createPlaceholder(page, commentNode.id, reason), commentNode);
+					}
 				}
 			}
 		}
