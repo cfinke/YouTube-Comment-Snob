@@ -1,58 +1,101 @@
 var YT_COMMENT_SNOB = {
-	get maxMistakes() { return YT_COMMENT_SNOB.prefs.getIntPref("mistakes"); },
-	get allcaps() { return YT_COMMENT_SNOB.prefs.getBoolPref("allcaps"); },
-	get nocaps() { return YT_COMMENT_SNOB.prefs.getBoolPref("nocaps"); },
-	get startsWithCapital() { return YT_COMMENT_SNOB.prefs.getBoolPref("startsWithCapital"); },
-	get punctuation() { return YT_COMMENT_SNOB.prefs.getBoolPref("punctuation"); },
-	get excessiveCapitals() { return YT_COMMENT_SNOB.prefs.getBoolPref("excessiveCapitals"); },
-	get profanity() { return YT_COMMENT_SNOB.prefs.getBoolPref("profanity"); },
-	get extreme() { return YT_COMMENT_SNOB.prefs.getBoolPref("extreme"); },
-	
-	dict : null,
-	
 	latestPage : null,
-
+	
 	prefs : null,
+	
+	maxMistakes : null,
+	allcaps : null,
+	nocaps : null,
+	startsWithCapital : null,
+	punctuation : null,
+	excessiveCapitals : null,
+	profanity : null,
+	extreme : null,
+	dict : null,
 	
 	load : function () {
 		var firefoxBrowser = document.getElementById("appcontent");
 
 		if (firefoxBrowser) {
-			firefoxBrowser.addEventListener("DOMContentLoaded", YT_COMMENT_SNOB.DOMContentLoaded, false);
+			firefoxBrowser.addEventListener("DOMContentLoaded", this.DOMContentLoaded, false);
+		}
+		else {
+			var fennecBrowser = document.getElementById("browsers");
+		
+			if (fennecBrowser) {
+				fennecBrowser.addEventListener("load", this.DOMContentLoaded, true);
+			}
 		}
 		
-		var fennecBrowser = document.getElementById("browsers");
+		this.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.youtube-comment-snob.");	
+		this.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
+		this.prefs.addObserver("", this, false);
 		
-		if (fennecBrowser) {
-			fennecBrowser.addEventListener("load", YT_COMMENT_SNOB.DOMContentLoaded, true);
-		}
+		this.maxMistakes = this.prefs.getIntPref("mistakes");
+		this.allcaps = this.prefs.getBoolPref("allcaps");
+		this.nocaps = this.prefs.getBoolPref("nocaps");
+		this.startsWithCapital = this.prefs.getBoolPref("startsWithCapital");
+		this.punctuation = this.prefs.getBoolPref("punctuation");
+		this.excessiveCapitals = this.prefs.getBoolPref("excessiveCapitals");
+		this.profanity = this.prefs.getBoolPref("profanity");
+		this.extreme = this.prefs.getBoolPref("extreme");
 		
-		YT_COMMENT_SNOB.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.youtube-comment-snob.");
-		
+		this.loadDictionary();
+	},
+	
+	loadDictionary : function () {
 		var spellclass = "@mozilla.org/spellchecker/myspell;1";
-		if ("@mozilla.org/spellchecker/hunspell;1" in Components.classes)
-			spellclass = "@mozilla.org/spellchecker/hunspell;1";
-		if ("@mozilla.org/spellchecker/engine;1" in Components.classes)
-			spellclass = "@mozilla.org/spellchecker/engine;1";
-			
-		var spellchecker = Components.classes[spellclass].createInstance(Components.interfaces.mozISpellCheckingEngine);
-		spellchecker.dictionary = YT_COMMENT_SNOB.prefs.getCharPref("dictionary");
 		
-		YT_COMMENT_SNOB.dict = spellchecker;
+		if ("@mozilla.org/spellchecker/hunspell;1" in Components.classes) {
+			spellclass = "@mozilla.org/spellchecker/hunspell;1";
+		}
+		
+		if ("@mozilla.org/spellchecker/engine;1" in Components.classes) {
+			spellclass = "@mozilla.org/spellchecker/engine;1";
+		}
+		
+		var spellchecker = Components.classes[spellclass].createInstance(Components.interfaces.mozISpellCheckingEngine);
+		
+		try {
+			spellchecker.dictionary = this.prefs.getCharPref("dictionary");
+			this.dict = spellchecker;
+		} catch (e) {
+			// Dictionary not available.
+			this.dict = null;
+		}
 	},
 	
 	unload : function () {
+		this.prefs.removeObserver("", this);
+		
 		var firefoxBrowser = document.getElementById("appcontent");
 
 		if (firefoxBrowser) {
-			firefoxBrowser.removeEventListener("DOMContentLoaded", YT_COMMENT_SNOB.DOMContentLoaded, false);
+			firefoxBrowser.removeEventListener("DOMContentLoaded", this.DOMContentLoaded, false);
+		}
+		else {
+			var fennecBrowser = document.getElementById("browsers");
+		
+			if (fennecBrowser) {
+				fennecBrowser.removeEventListener("load", this.DOMContentLoaded, true);
+			}
+		}
+	},
+	
+	observe : function(subject, topic, data) {
+		if (topic != "nsPref:changed") {
+			return;
 		}
 		
-		var fennecBrowser = document.getElementById("browsers");
-		
-		if (fennecBrowser) {
-			fennecBrowser.removeEventListener("load", YT_COMMENT_SNOB.DOMContentLoaded, true);
-		}
+		YT_COMMENT_SNOB.maxMistakes = YT_COMMENT_SNOB.prefs.getIntPref("mistakes");
+		YT_COMMENT_SNOB.allcaps = YT_COMMENT_SNOB.prefs.getBoolPref("allcaps");
+		YT_COMMENT_SNOB.nocaps = YT_COMMENT_SNOB.prefs.getBoolPref("nocaps");
+		YT_COMMENT_SNOB.startsWithCapital = YT_COMMENT_SNOB.prefs.getBoolPref("startsWithCapital");
+		YT_COMMENT_SNOB.punctuation = YT_COMMENT_SNOB.prefs.getBoolPref("punctuation");
+		YT_COMMENT_SNOB.excessiveCapitals = YT_COMMENT_SNOB.prefs.getBoolPref("excessiveCapitals");
+		YT_COMMENT_SNOB.profanity = YT_COMMENT_SNOB.prefs.getBoolPref("profanity");
+		YT_COMMENT_SNOB.extreme = YT_COMMENT_SNOB.prefs.getBoolPref("extreme");
+		YT_COMMENT_SNOB.loadDictionary();
 	},
 	
 	DOMContentLoaded : function (event) {
@@ -77,8 +120,8 @@ var YT_COMMENT_SNOB = {
 			
 				try {
 					if (b.currentURI.spec.match(re)) {
-						YT_COMMENT_SNOB.latestPage = b.contentDocument;
-						setTimeout('YT_COMMENT_SNOB.filterComments();', 500);
+						this.latestPage = b.contentDocument;
+						setTimeout(function () { YT_COMMENT_SNOB.filterComments(); }, 500);
 					}
 				} catch(e) {
 					alert(e);
@@ -93,8 +136,8 @@ var YT_COMMENT_SNOB = {
 				
 				try {
 					if (b.currentURI.spec.match(re)) {
-						YT_COMMENT_SNOB.latestPage = b.contentDocument;
-						setTimeout('YT_COMMENT_SNOB.filterComments();', 500);
+						this.latestPage = b.contentDocument;
+						setTimeout(function () { YT_COMMENT_SNOB.filterComments(); }, 500);
 					}
 				} catch(e) {
 					alert(e);
@@ -104,9 +147,9 @@ var YT_COMMENT_SNOB = {
 	},
 	
 	filterComments : function (page) {
-		if (!page) page = YT_COMMENT_SNOB.latestPage;
+		if (!page) page = this.latestPage;
 		
-		if (YT_COMMENT_SNOB.extreme) {
+		if (this.extreme) {
 			var comments = page.getElementById("watch-comment-panel");
 			
 			if (comments) {
@@ -141,25 +184,25 @@ var YT_COMMENT_SNOB = {
 			
 				var reason = '';
 			
-				if (YT_COMMENT_SNOB.allcaps && !originalText.match(/[a-z]/m)){
+				if (this.allcaps && !originalText.match(/[a-z]/m)){
 					reason = "All capital letters";
 				}
-				else if (YT_COMMENT_SNOB.nocaps && !originalText.match(/[A-Z]/m)){
+				else if (this.nocaps && !originalText.match(/[A-Z]/m)){
 					reason = "No capital letters";
 				}
-				else if (YT_COMMENT_SNOB.startsWithCapital && originalText.match(/^[a-z]/m)){
+				else if (this.startsWithCapital && originalText.match(/^[a-z]/m)){
 					reason = "Doesn't start with a capital letter.";
 				}
-				else if (YT_COMMENT_SNOB.punctuation && originalText.match(/(!{2,})|(\?{3,})/m)){
+				else if (this.punctuation && originalText.match(/(!{2,})|(\?{3,})/m)){
 					reason = "Excessive punctuation.";
 				}
-				else if (YT_COMMENT_SNOB.excessiveCapitals && originalText.match(/[A-Z]{5,}/m)){
+				else if (this.excessiveCapitals && originalText.match(/[A-Z]{5,}/m)){
 					reason = "Excessive capitalization.";
 				}
-				else if (YT_COMMENT_SNOB.profanity && originalText.match(/\b(ass(hole)?\b|bitch|cunt|damn|fuc[kc]|(bull)?shits?\b|fag|nigger|nigga)/i)) {
+				else if (this.profanity && originalText.match(/\b(ass(hole)?\b|bitch|cunt|damn|fuc[kc]|(bull)?shits?\b|fag|nigger|nigga)/i)) {
 					reason = "Profanity.";
 				}
-				else {
+				else if (this.dict) {
 					var text = originalText;
 
 					text = text.replace(/\s/mg, " ");
@@ -169,13 +212,13 @@ var YT_COMMENT_SNOB = {
 					words = text.split(" ");
 
 					for (var j = 0; j < words.length; j++){
-						if (!YT_COMMENT_SNOB.dict.check(words[j])){
+						if (!this.dict.check(words[j])){
 							if (
 								(words[j].charAt(0) === words[j].charAt(0).toUpperCase()) &&
 								(words[j].substring(1) === words[j].substring(1).toLowerCase())
 							)
 							{
-									// Probably a name.
+								// Probably a name.
 							}
 							else {
 								mistakes++;
@@ -183,7 +226,7 @@ var YT_COMMENT_SNOB = {
 						}
 					}
 				
-					if (mistakes >= YT_COMMENT_SNOB.maxMistakes || mistakes == words.length) {
+					if (mistakes >= this.maxMistakes || mistakes == words.length) {
 						reason = mistakes + " spelling error";
 						if (mistakes != 1) reason += "s";
 					}
@@ -197,7 +240,7 @@ var YT_COMMENT_SNOB = {
 				
 					if (commentNode.id) {
 						commentNode.style.display = 'none';
-						topNode.insertBefore(YT_COMMENT_SNOB.createPlaceholder(page, commentNode.id, reason), commentNode);
+						topNode.insertBefore(this.createPlaceholder(page, commentNode.id, reason), commentNode);
 					}
 				}
 			}
@@ -213,5 +256,5 @@ var YT_COMMENT_SNOB = {
 	}
 };
 
-addEventListener("load", YT_COMMENT_SNOB.load, false);
-addEventListener("unload", YT_COMMENT_SNOB.unload, false);
+addEventListener("load", function () { YT_COMMENT_SNOB.load(); }, false);
+addEventListener("unload", function () { YT_COMMENT_SNOB.unload(); }, false);

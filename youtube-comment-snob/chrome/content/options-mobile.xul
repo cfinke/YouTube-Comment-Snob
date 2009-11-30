@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<setting id="extensions.youtube-comment-snob.extreme" pref="extensions.youtube-comment-snob.extreme" type="bool" title="Hide all YouTube comments" />
 	<setting id="extensions.youtube-comment-snob.mistakes" pref="extensions.youtube-comment-snob.mistakes" type="int" title="Hide comments with more than X mistakes:" />
 	<setting id="extensions.youtube-comment-snob.profanity" pref="extensions.youtube-comment-snob.profanity" type="bool" title="Hide comments that include profanity." />
 	<setting id="extensions.youtube-comment-snob.allcaps" pref="extensions.youtube-comment-snob.allcaps" type="bool" title="Hide comments that have only capital letters." />

@@ -3,6 +3,34 @@
 	title="YouTube Comment Snob - Options"
 	buttons="accept,cancel"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript">
+		<![CDATA[
+		
+		addEventListener("load", function () {
+				document.getElementById("extensions.youtube-comment-snob.extreme").addEventListener("change", setDisabled, false);
+				setDisabled();
+			}, false);
+		
+		addEventListener("unload", function () {
+				document.getElementById("extensions.youtube-comment-snob.extreme").removeEventListener("change", setDisabled, false);
+			}, false);
+		
+		function setDisabled() {
+			var disabled = document.getElementById("extensions.youtube-comment-snob.extreme").value;
+			
+			var container = document.getElementById("snob-parameters");
+			
+			var checkboxes = container.getElementsByTagName("checkbox");
+			
+			for (var i = 0; i < checkboxes.length; i++) {
+				checkboxes[i].disabled = disabled;
+			}
+			
+			document.getElementById("mistakes").disabled = disabled;
+		}
+		
+		]]>
+	</script>
 	<prefpane id="general-pane" label="YouTube Comment Snob - Options">
 		<preferences>
 			<preference id="extensions.youtube-comment-snob.mistakes" name="extensions.youtube-comment-snob.mistakes" type="int" />
@@ -16,24 +44,25 @@
 			<preference id="extensions.youtube-comment-snob.extreme" name="extensions.youtube-comment-snob.extreme" type="bool" />
 		</preferences>
 		<groupbox>
-			<hbox>
-				<label value="Hide comments with " control="mistakes" /><textbox id="mistakes" preference="extensions.youtube-comment-snob.mistakes" size="3"/><label control="mistakes" value=" or more spelling mistakes." />
-			</hbox>			
+			<checkbox preference="extensions.youtube-comment-snob.extreme" label="Hide all YouTube comments" />
+		</groupbox>
+		<groupbox id="snob-parameters">
+			<hbox align="center">
+				<label value="Hide comments with " control="mistakes" />
+				<textbox id="mistakes" preference="extensions.youtube-comment-snob.mistakes" size="3"/>
+				<label control="mistakes" value=" or more spelling mistakes." />
+			</hbox>
 			<checkbox preference="extensions.youtube-comment-snob.nocaps" label="Hide comments that have no capital letters." />
 			<checkbox preference="extensions.youtube-comment-snob.allcaps" label="Hide comments that have only capital letters." />
 			<checkbox preference="extensions.youtube-comment-snob.startsWithCapital" label="Hide comments that do not start with a capital letter." />
 			<checkbox preference="extensions.youtube-comment-snob.punctuation" label="Hide comments that have excessive punctuation. (!!!!! ?????)" />
 			<checkbox preference="extensions.youtube-comment-snob.excessiveCapitals" label="Hide comments that have excessive capitalization." />			
 			<checkbox preference="extensions.youtube-comment-snob.profanity" label="Hide comments that include profanity." />
-			<checkbox preference="extensions.youtube-comment-snob.extreme" label="Hide all YouTube comments" />
 		</groupbox>
 		<groupbox>
-			<vbox>
-				<hbox>
-					<label control="dictionary" value="Dictionary: " /><textbox id="dictionary" preference="extensions.youtube-comment-snob.dictionary" size="5" />
-				</hbox>
-				<description>(Requires a browser restart.)</description>
-			</vbox>
+			<hbox align="center">
+				<label control="dictionary" value="Dictionary: " /><textbox id="dictionary" preference="extensions.youtube-comment-snob.dictionary" size="5" />
+			</hbox>
 		</groupbox>
 	</prefpane>
 </prefwindow>
