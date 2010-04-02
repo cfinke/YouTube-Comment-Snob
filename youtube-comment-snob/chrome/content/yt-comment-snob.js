@@ -150,20 +150,14 @@ var YT_COMMENT_SNOB = {
 		if (!page) page = this.latestPage;
 		
 		if (this.extreme) {
-			var comments = page.getElementById("watch-comment-panel");
+			var comments = page.getElementById("watch-comments-core");
 			
 			if (comments) {
 				comments.parentNode.removeChild(comments);
 			}
-			
-			var all_comments = page.getElementById("comment-video-info");
-			
-			if (all_comments) {
-				all_comments.parentNode.removeChild(all_comments);
-			}
 		}
 		else {
-			var commentNodes = page.evaluate("//div[@class='watch-comment-body']", page, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+			var commentNodes = page.evaluate("//ul[@id='watch-comments-core']/li/div[@class='wrapper']/span[@class='content']", page, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 			var comment = commentNodes.iterateNext();
 			var comments = [];
 			var mistakes = 0;
@@ -172,16 +166,15 @@ var YT_COMMENT_SNOB = {
 				comments.push(comment);
 				comment = commentNodes.iterateNext();
 			}
+			
+			this.log("len: " +comments.length);
 		
 			for (var i = 0; i < comments.length; i++){
 				mistakes = 0;
 				comment = comments[i];
 			
-				var commentNode = comment.parentNode.parentNode;
-				var topNode = commentNode.parentNode;
-			
 				var originalText = comment.innerHTML.replace(/<[^>]+>/gm, " ").replace(/^\s+|\s+$/mg, "");
-			
+				
 				var reason = '';
 			
 				if (this.allcaps && !originalText.match(/[a-z]/m)){
@@ -191,26 +184,26 @@ var YT_COMMENT_SNOB = {
 					reason = "No capital letters";
 				}
 				else if (this.startsWithCapital && originalText.match(/^[a-z]/m)){
-					reason = "Doesn't start with a capital letter.";
+					reason = "Doesn't start with a capital letter";
 				}
 				else if (this.punctuation && originalText.match(/(!{2,})|(\?{3,})/m)){
-					reason = "Excessive punctuation.";
+					reason = "Excessive punctuation";
 				}
 				else if (this.excessiveCapitals && originalText.match(/[A-Z]{5,}/m)){
-					reason = "Excessive capitalization.";
+					reason = "Excessive capitalization";
 				}
 				else if (this.profanity && originalText.match(/\b(ass(hole)?\b|bitch|cunt|damn|fuc[kc]|(bull)?shits?\b|fag|nigger|nigga)/i)) {
-					reason = "Profanity.";
+					reason = "Profanity";
 				}
 				else if (this.dict) {
 					var text = originalText;
-
+					
 					text = text.replace(/\s/mg, " ");
 					text = text.replace(/\s+|[^a-z0-9\-']/img, " ");
 					text = text.replace(/^\s+|\s+$/mg, "");
-
+					
 					words = text.split(" ");
-
+					
 					for (var j = 0; j < words.length; j++){
 						if (!this.dict.check(words[j])){
 							if (
@@ -225,34 +218,37 @@ var YT_COMMENT_SNOB = {
 							}
 						}
 					}
-				
+					
 					if (mistakes >= this.maxMistakes || mistakes == words.length) {
 						reason = mistakes + " spelling error";
 						if (mistakes != 1) reason += "s";
 					}
 				}
-			
-				if (reason != ''){
-					if (!commentNode.id) {
-						commentNode = topNode;
-						topNode = commentNode.parentNode;
-					}
 				
-					if (commentNode.id) {
-						commentNode.style.display = 'none';
-						topNode.insertBefore(this.createPlaceholder(page, commentNode.id, reason), commentNode);
-					}
+				if (reason != ''){
+					var commentNode = comment.parentNode.parentNode;
+					var topNode = commentNode.parentNode;
+					var id = "youtube-comment-snob-" + i;
+					commentNode.setAttribute("id", id);
+					commentNode.style.display = 'none';
+					topNode.insertBefore(this.createPlaceholder(page, id, reason), commentNode);
 				}
 			}
 		}
 	},
 	
 	createPlaceholder : function (page, id, reason) {
-		var el = page.createElement("div");
-		el.setAttribute("class", "watch-comment-head watch-comment-marked-spam smallText opacity30");
-		el.innerHTML = 'Comment hidden (' + reason + ') <a class="eLink smallText" href="javascript:void(0);" onclick="if (document.getElementById(\''+id+'\').style.display == \'\') { document.getElementById(\''+id+'\').style.display = \'none\'; this.innerHTML = \'Show\';} else { document.getElementById(\''+id+'\').style.display = \'\'; this.innerHTML = \'Hide\';}">Show</a>';
+		var el = page.createElement("li");
+		el.style.color = "#666";
+		el.style.width = "100%";
+		el.innerHTML = '<div class="wrapper"><span class="content">Comment hidden (' + reason + ') <a href="javascript:void(0);" onclick="if (document.getElementById(\''+id+'\').style.display == \'\') { document.getElementById(\''+id+'\').style.display = \'none\'; this.innerHTML = \'Show\';} else { document.getElementById(\''+id+'\').style.display = \'\'; this.innerHTML = \'Hide\';}">Show</a></span></div>';
 		
 		return el;
+	},
+	
+	log : function (msg) {
+		var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+		consoleService.logStringMessage("YCS: " + msg);
 	}
 };
 
