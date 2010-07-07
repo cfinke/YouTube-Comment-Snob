@@ -150,14 +150,14 @@ var YT_COMMENT_SNOB = {
 		if (!page) page = this.latestPage;
 		
 		if (this.extreme) {
-			var comments = page.getElementById("watch-comments-core");
+			var comments = page.getElementById("comments-view");
 			
 			if (comments) {
 				comments.parentNode.removeChild(comments);
 			}
 		}
 		else {
-			var commentNodes = page.evaluate("//ul[@id='watch-comments-core']/li/div[@class='wrapper']/span[@class='content']", page, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+			var commentNodes = page.evaluate("//div[@id='comments-view']//li[@class='comment']/div[@class='content']/div[@class='comment-text']", page, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 			var comment = commentNodes.iterateNext();
 			var comments = [];
 			var mistakes = 0;
@@ -167,13 +167,11 @@ var YT_COMMENT_SNOB = {
 				comment = commentNodes.iterateNext();
 			}
 			
-			this.log("len: " +comments.length);
-		
 			for (var i = 0; i < comments.length; i++){
 				mistakes = 0;
 				comment = comments[i];
 			
-				var originalText = comment.innerHTML.replace(/<[^>]+>/gm, " ").replace(/^\s+|\s+$/mg, "");
+				var originalText = comment.innerHTML.replace(/<[^>]+>/gm, " ").replace(/^\s+|\s+$/mg, "").replace(/^@\S+/g, "");
 				
 				var reason = '';
 			
@@ -239,9 +237,9 @@ var YT_COMMENT_SNOB = {
 	
 	createPlaceholder : function (page, id, reason) {
 		var el = page.createElement("li");
+		el.setAttribute("class", "comment");
 		el.style.color = "#666";
-		el.style.width = "100%";
-		el.innerHTML = '<div class="wrapper"><span class="content">Comment hidden (' + reason + ') <a href="javascript:void(0);" onclick="if (document.getElementById(\''+id+'\').style.display == \'\') { document.getElementById(\''+id+'\').style.display = \'none\'; this.innerHTML = \'Show\';} else { document.getElementById(\''+id+'\').style.display = \'\'; this.innerHTML = \'Hide\';}">Show</a></span></div>';
+		el.innerHTML = 'Comment hidden (' + reason + ') <a href="javascript:void(0);" onclick="if (document.getElementById(\''+id+'\').style.display == \'\') { document.getElementById(\''+id+'\').style.display = \'none\'; this.innerHTML = \'Show\';} else { document.getElementById(\''+id+'\').style.display = \'\'; this.innerHTML = \'Hide\';}">Show</a>';
 		
 		return el;
 	},
