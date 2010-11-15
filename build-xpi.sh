@@ -7,7 +7,7 @@ chmod -R 0777 youtube-comment-snob/
 
 mkdir .tmp_xpi_dir/
 cp -r youtube-comment-snob/* .tmp_xpi_dir/
-rm -rf `find ./.tmp_xpi_dir/ -name ".svn"`
+rm -rf `find ./.tmp_xpi_dir/ -name ".git"`
 
 cd .tmp_xpi_dir/chrome/
 zip -rq ../youtube-comment-snob.jar *
