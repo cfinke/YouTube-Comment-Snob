@@ -1,4 +1,41 @@
-var YT_COMMENT_SNOB = {
+var snobs = [
+	{
+		"id": "youtube@chrisfinke.com",
+		"url": "^http://www\.youtube\.com/.*$",
+		"allCommentsSelector": "#comments-view",
+		"textSelector": "#comments-view li.comment > div.content > div.comment-text",
+		"commentContainerSelector": ".comment",
+		"placeholderElement": "li",
+		"placeholderAttributes": {
+			"class": "comment",
+			"style": "color: #666;"
+		},
+		"ajaxInitiatorSelector": ".comments-pagination button, .comments-pagination a, .comments-pagination button > span",
+		"updateURL": "http://www.chrisfinke.com/snobs/youtube.snob"
+	},
+	{
+		"url": "^http://www\.fark\.com/comments",
+		"allCommentsSelector": "#commentsArea",
+		"textSelector": "#commentsArea .ctext",
+		"placeholderElement": "div",
+		"placeholderAttributes": {
+			"class": "ctext",
+			"style": "color: #666;"
+		}
+	},
+	{
+		"url": "^http://news\.ycombinator\.com/item",
+		"allCommentsSelector": "body > center > table > tr:eq(2) > td:first > table:eq(1)",
+		"textSelector": "span.comment",
+		"placeholderElement": "p",
+		"placeholderAttributes": {
+			"style": "color: #666; margin-bottom: 10px;"
+			
+		}
+	}
+];
+
+var COMMENT_SNOB = {
 	prefs : {
 		namespace : "extensions.youtube-comment-snob.",
 		
@@ -106,18 +143,18 @@ var YT_COMMENT_SNOB = {
 	
 	options : {
 		load : function () {
-			addEventListener("unload", YT_COMMENT_SNOB.options.unload, false);
+			addEventListener("unload", COMMENT_SNOB.options.unload, false);
 			
-			YT_COMMENT_SNOB.options.localize(document);
+			COMMENT_SNOB.options.localize(document);
 			
-			document.getElementById("save-button").addEventListener("click", YT_COMMENT_SNOB.options.save, false);
+			document.getElementById("save-button").addEventListener("click", COMMENT_SNOB.options.save, false);
 			
 			var items = document.getElementsByClassName("preference-bool");
 			
 			for (var i = 0, _len = items.length; i < _len; i++) {
 				var item = items.item(i);
 				
-				item.checked = YT_COMMENT_SNOB.prefs.getBoolPref(item.getAttribute("preference"));
+				item.checked = COMMENT_SNOB.prefs.getBoolPref(item.getAttribute("preference"));
 			}
 
 			var items = document.getElementsByClassName("preference-char");
@@ -125,11 +162,11 @@ var YT_COMMENT_SNOB = {
 			for (var i = 0, _len = items.length; i < _len; i++) {
 				var item = items.item(i);
 				
-				item.value = YT_COMMENT_SNOB.prefs.getCharPref(item.getAttribute("preference"));
+				item.value = COMMENT_SNOB.prefs.getCharPref(item.getAttribute("preference"));
 			}
 			
-			document.getElementById("extreme").addEventListener("change", YT_COMMENT_SNOB.options.setDisabled, false);
-			YT_COMMENT_SNOB.options.setDisabled();
+			document.getElementById("extreme").addEventListener("change", COMMENT_SNOB.options.setDisabled, false);
+			COMMENT_SNOB.options.setDisabled();
 		},
 		
 		localize : function (page) {
@@ -167,11 +204,11 @@ var YT_COMMENT_SNOB = {
 		},
 		
 		unload : function () {
-			removeEventListener("unload", YT_COMMENT_SNOB.options.unload, false);
+			removeEventListener("unload", COMMENT_SNOB.options.unload, false);
 			
-			document.getElementById("save-button").removeEventListener("click", YT_COMMENT_SNOB.options.save, false);
+			document.getElementById("save-button").removeEventListener("click", COMMENT_SNOB.options.save, false);
 			
-			document.getElementById("extreme").removeEventListener("change", YT_COMMENT_SNOB.options.setDisabled, false);
+			document.getElementById("extreme").removeEventListener("change", COMMENT_SNOB.options.setDisabled, false);
 		},
 		
 		save : function () {
@@ -180,7 +217,7 @@ var YT_COMMENT_SNOB = {
 			for (var i = 0, _len = items.length; i < _len; i++) {
 				var item = items.item(i);
 				
-				YT_COMMENT_SNOB.prefs.setBoolPref(item.getAttribute("preference"), item.checked);
+				COMMENT_SNOB.prefs.setBoolPref(item.getAttribute("preference"), item.checked);
 			}
 
 			var items = document.getElementsByClassName("preference-char");
@@ -188,7 +225,7 @@ var YT_COMMENT_SNOB = {
 			for (var i = 0, _len = items.length; i < _len; i++) {
 				var item = items.item(i);
 				
-				YT_COMMENT_SNOB.prefs.setCharPref(item.getAttribute("preference"), item.value);
+				COMMENT_SNOB.prefs.setCharPref(item.getAttribute("preference"), item.value);
 			}
 			
 			document.getElementById("save-button").innerHTML = "Saved!";
@@ -201,8 +238,8 @@ var YT_COMMENT_SNOB = {
 	
 	load : function () {
 		function pref(name, val) {
-			if (YT_COMMENT_SNOB.prefs.getPref(name) === null) {
-				YT_COMMENT_SNOB.prefs.setPref(name, val);
+			if (COMMENT_SNOB.prefs.getPref(name) === null) {
+				COMMENT_SNOB.prefs.setPref(name, val);
 			}
 		}
 		
@@ -218,20 +255,20 @@ var YT_COMMENT_SNOB = {
 };
 
 chrome.extension.onRequest.addListener(function (request, sender, sendResponse) {
-	if (request.subject === "prefs") {
+	if (request.subject === "snobs") {
 		var prefs = {};
 		
-		prefs.maxMistakes = YT_COMMENT_SNOB.prefs.getIntPref("mistakes");
-		prefs.allcaps = YT_COMMENT_SNOB.prefs.getBoolPref("allcaps");
-		prefs.nocaps = YT_COMMENT_SNOB.prefs.getBoolPref("nocaps");
-		prefs.startsWithCapital = YT_COMMENT_SNOB.prefs.getBoolPref("startsWithCapital");
-		prefs.punctuation = YT_COMMENT_SNOB.prefs.getBoolPref("punctuation");
-		prefs.excessiveCapitals = YT_COMMENT_SNOB.prefs.getBoolPref("excessiveCapitals");
-		prefs.profanity = YT_COMMENT_SNOB.prefs.getBoolPref("profanity");
-		prefs.extreme = YT_COMMENT_SNOB.prefs.getBoolPref("extreme");
+		prefs.maxMistakes = COMMENT_SNOB.prefs.getIntPref("mistakes");
+		prefs.allcaps = COMMENT_SNOB.prefs.getBoolPref("allcaps");
+		prefs.nocaps = COMMENT_SNOB.prefs.getBoolPref("nocaps");
+		prefs.startsWithCapital = COMMENT_SNOB.prefs.getBoolPref("startsWithCapital");
+		prefs.punctuation = COMMENT_SNOB.prefs.getBoolPref("punctuation");
+		prefs.excessiveCapitals = COMMENT_SNOB.prefs.getBoolPref("excessiveCapitals");
+		prefs.profanity = COMMENT_SNOB.prefs.getBoolPref("profanity");
+		prefs.extreme = COMMENT_SNOB.prefs.getBoolPref("extreme");
 		
-		sendResponse({ "prefs" : prefs });
+		sendResponse({ "prefs" : prefs, "snobs": snobs });
 	}
 });
 
-addEventListener("load", YT_COMMENT_SNOB.load, false);
+addEventListener("load", COMMENT_SNOB.load, false);

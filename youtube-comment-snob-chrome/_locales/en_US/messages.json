@@ -1,18 +1,18 @@
 {
 	"extName": {
-		"message": "YouTube Comment Snob"
+		"message": "Comment Snob"
 	},
 	"extDescription": {
-		"message": "Filters out undesirable comments from YouTube comment threads."
+		"message": "Filters out undesirable comments from the Web."
 	},
 	"action_save": {
 		"message": "Save"
 	},
 	"options_page_title": {
-		"message": "YouTube Comment Snob Options"
+		"message": "Comment Snob Options"
 	},
 	"label_hide_all": {
-		"message": "Hide all YouTube comments"
+		"message": "Hide all comments"
 	},
 	"label_hide_no_capital": {
 		"message": "Hide comments that have no capital letters."
