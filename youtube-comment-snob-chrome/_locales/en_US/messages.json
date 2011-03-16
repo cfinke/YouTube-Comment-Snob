@@ -11,6 +11,9 @@
 	"options_page_title": {
 		"message": "Comment Snob Options"
 	},
+	"label_site": {
+		"message": "Site:"
+	},
 	"label_hide_all": {
 		"message": "Hide all comments"
 	},
@@ -69,5 +72,17 @@
 	"reason_too_much_profanity": {
 		"message": "Profanity",
 		"description": "A reason shown to the user when hiding a comment."
+	},
+	"option_default": {
+		"message": "(Default)"
+	},
+	"action_remove": {
+		"message": "Remove"
+	},
+	"action_add": {
+		"message": "Add a new site"
+	},
+	"install_rule": {
+		"message": "Install a Comment Snob Rule from this page"
 	}
 }

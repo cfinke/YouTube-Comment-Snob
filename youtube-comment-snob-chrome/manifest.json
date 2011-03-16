@@ -9,13 +9,18 @@
 	},
 	"homepage_url": "http://www.chrisfinke.com/addons/comment-snob/",
 	"default_locale": "en_US",
-	"permissions": [ "http://*/*", "https://*/*" ],
+	"permissions": [ "http://*/*", "https://*/*", "contextMenus", "tabs" ],
 	"background_page": "background.html",
 	"content_scripts": [
 		{
 			"matches": [ "http://*/*", "https://*/*" ],
-			"js": [ "jquery.js", "content.js" ]
+			"js": [ "jquery.js", "minify.json.js", "content.js" ]
 		}
 	],
-	"options_page": "options.html"
+	"options_page": "options.html",
+	"page_action": {
+		"default_icon": "skin/icon-16.png",
+		"default_title": "__MSG_install_rule__",
+		"default_popup": "page_action.html"
+	}
 }

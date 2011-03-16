@@ -1,274 +1,85 @@
-var snobs = [
-	{
-		"id": "youtube@chrisfinke.com",
-		"url": "^http://www\.youtube\.com/.*$",
-		"allCommentsSelector": "#comments-view",
-		"textSelector": "#comments-view li.comment > div.content > div.comment-text",
-		"commentContainerSelector": ".comment",
-		"placeholderElement": "li",
-		"placeholderAttributes": {
-			"class": "comment",
-			"style": "color: #666;"
-		},
-		"ajaxInitiatorSelector": ".comments-pagination button, .comments-pagination a, .comments-pagination button > span",
-		"updateURL": "http://www.chrisfinke.com/snobs/youtube.snob"
-	},
-	{
-		"url": "^http://www\.fark\.com/comments",
-		"allCommentsSelector": "#commentsArea",
-		"textSelector": "#commentsArea .ctext",
-		"placeholderElement": "div",
-		"placeholderAttributes": {
-			"class": "ctext",
-			"style": "color: #666;"
-		}
-	},
-	{
-		"url": "^http://news\.ycombinator\.com/item",
-		"allCommentsSelector": "body > center > table > tr:eq(2) > td:first > table:eq(1)",
-		"textSelector": "span.comment",
-		"placeholderElement": "p",
-		"placeholderAttributes": {
-			"style": "color: #666; margin-bottom: 10px;"
-			
-		}
-	}
-];
+var currentRules = null;
 
-var COMMENT_SNOB = {
-	prefs : {
-		namespace : "extensions.youtube-comment-snob.",
-		
-		_observers : {},
-		
-		addObserver : function (observer) {
-			var key = Math.random();
-			
-			this._observers[key] = observer;
-		},
-		
-		removeObserver : function (key) {
-			delete this._observers[key];
-		},
-		
-		getPref : function (prefName) {
-			var key = this.namespace + prefName;
-			
-			if (key in localStorage) {
-				return localStorage[this.namespace + prefName];
-			}
-			else {
-				return null;
-			}
-		},
-
-		getBoolPref : function (prefName) {
-			var rv = this.getPref(prefName);
-
-			if (!rv || rv == "false" || rv == "null") {
-				return false;
-			}
-
-			return true;
-		},
-
-		getCharPref : function (prefName) {
-			var rv = this.getPref(prefName);
-			
-			if (typeof rv == 'undefined' || rv == "null") {
-				rv = "";
-			}
-
-			return rv;
-		},
-		
-		getIntPref : function (prefName) {
-			var rv = this.getPref(prefName);
-			
-			if (typeof rv == 'undefined' || rv == "null") {
-				rv = 0;
-			}
-			else {
-				rv = parseInt(rv, 10);
-			}
-
-			return rv;
-		},
-		
-		getJSONPref : function (prefName, defaultValue) {
-			var rv = this.getCharPref(prefName);
-			
-			if (!rv) {
-				return defaultValue;
-			}
-			else {
-				return JSON.parse(rv);
-			}
-		},
-		
-		setPref : function (prefName, prefVal) {
-			var existing = this.getPref(prefName);
-			
-			if (existing !== prefVal) {
-				if (typeof prefVal == 'undefined' || prefVal === null) {
-					prefVal = "";
-				}
-				
-				localStorage[this.namespace + prefName] = prefVal;
-				
-				for (var i in this._observers) {
-					this._observers[i].observe(null, "nsPref:changed", prefName);
-				}
-			}
-		},
-
-		setCharPref : function (prefName, prefVal) {
-			this.setPref(prefName, prefVal);
-		},
-		
-		setIntPref : function (prefName, prefVal) {
-			this.setPref(prefName, prefVal.toString());
-		},
-		
-		setJSONPref : function (prefName, prefVal) {
-			var stringPrefVal = JSON.stringify(prefVal);
-			
-			this.setCharPref(prefName, stringPrefVal);
-		},
-		
-		setBoolPref : function (prefName, prefVal) {
-			this.setPref(prefName, !!prefVal);
-		}
-	},
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+	currentRules = null;
 	
-	options : {
-		load : function () {
-			addEventListener("unload", COMMENT_SNOB.options.unload, false);
-			
-			COMMENT_SNOB.options.localize(document);
-			
-			document.getElementById("save-button").addEventListener("click", COMMENT_SNOB.options.save, false);
-			
-			var items = document.getElementsByClassName("preference-bool");
-			
-			for (var i = 0, _len = items.length; i < _len; i++) {
-				var item = items.item(i);
-				
-				item.checked = COMMENT_SNOB.prefs.getBoolPref(item.getAttribute("preference"));
-			}
-
-			var items = document.getElementsByClassName("preference-char");
-			
-			for (var i = 0, _len = items.length; i < _len; i++) {
-				var item = items.item(i);
-				
-				item.value = COMMENT_SNOB.prefs.getCharPref(item.getAttribute("preference"));
-			}
-			
-			document.getElementById("extreme").addEventListener("change", COMMENT_SNOB.options.setDisabled, false);
-			COMMENT_SNOB.options.setDisabled();
-		},
-		
-		localize : function (page) {
-			$(page).find("i18n").each(function () {
-				var $this = $(this);
-
-				var string = chrome.i18n.getMessage($this.attr("data-key"));
-
-				if (string) {
-					$this.replaceWith(string);
-				}
-			});
-
-			$(page).find(".i18n").each(function () {
-				var $this = $(this);
-
-				var string = chrome.i18n.getMessage($this.attr("data-key"));
-
-				if (string) {
-					$this.text(string);
-				}
-			});
-			
-			page.title = chrome.i18n.getMessage("options_page_title");
-		},
-		
-		setDisabled : function () {
-			var disabled = document.getElementById("extreme").checked;
-			
-			var items = document.getElementsByClassName("preference");
-			
-			for (var i = 0, _len = items.length; i < _len; i++) {
-				items.item(i).disabled = disabled;
-			}
-		},
-		
-		unload : function () {
-			removeEventListener("unload", COMMENT_SNOB.options.unload, false);
-			
-			document.getElementById("save-button").removeEventListener("click", COMMENT_SNOB.options.save, false);
-			
-			document.getElementById("extreme").removeEventListener("change", COMMENT_SNOB.options.setDisabled, false);
-		},
-		
-		save : function () {
-			var items = document.getElementsByClassName("preference-bool");
-			
-			for (var i = 0, _len = items.length; i < _len; i++) {
-				var item = items.item(i);
-				
-				COMMENT_SNOB.prefs.setBoolPref(item.getAttribute("preference"), item.checked);
-			}
-
-			var items = document.getElementsByClassName("preference-char");
-			
-			for (var i = 0, _len = items.length; i < _len; i++) {
-				var item = items.item(i);
-				
-				COMMENT_SNOB.prefs.setCharPref(item.getAttribute("preference"), item.value);
-			}
-			
-			document.getElementById("save-button").innerHTML = "Saved!";
-			
-			setTimeout(function () {
-				document.getElementById("save-button").innerHTML = "Save";
-			}, 2000);
-		}
-	},
+	// Re-get the rules for this tab.
+	chrome.tabs.sendRequest(tabId, { subject : "rules" });
 	
-	load : function () {
-		function pref(name, val) {
-			if (COMMENT_SNOB.prefs.getPref(name) === null) {
-				COMMENT_SNOB.prefs.setPref(name, val);
-			}
-		}
-		
-		pref("mistakes", 2);
-		pref("allcaps", true);
-		pref("nocaps", true);
-		pref("punctuation", true);
-		pref("startsWithCapital", true);
-		pref("excessiveCapitals", true);
-		pref("profanity", false);
-		pref("extreme", false);
-	}
-};
+	// Check if this page matches any of the rules.
+	var rules = COMMENT_SNOB.prefs.getJSONPref("rules", {});
+	
+	for (var i in rules) {
+		var regex = new RegExp(rules[i].url, "i");
 
-chrome.extension.onRequest.addListener(function (request, sender, sendResponse) {
-	if (request.subject === "snobs") {
-		var prefs = {};
-		
-		prefs.maxMistakes = COMMENT_SNOB.prefs.getIntPref("mistakes");
-		prefs.allcaps = COMMENT_SNOB.prefs.getBoolPref("allcaps");
-		prefs.nocaps = COMMENT_SNOB.prefs.getBoolPref("nocaps");
-		prefs.startsWithCapital = COMMENT_SNOB.prefs.getBoolPref("startsWithCapital");
-		prefs.punctuation = COMMENT_SNOB.prefs.getBoolPref("punctuation");
-		prefs.excessiveCapitals = COMMENT_SNOB.prefs.getBoolPref("excessiveCapitals");
-		prefs.profanity = COMMENT_SNOB.prefs.getBoolPref("profanity");
-		prefs.extreme = COMMENT_SNOB.prefs.getBoolPref("extreme");
-		
-		sendResponse({ "prefs" : prefs, "snobs": snobs });
+		if (tab.url.match(regex)) {
+			chrome.tabs.sendRequest(tabId, { subject : "filter", rule : rules[i], prefs : COMMENT_SNOB.getRulePrefs(i) });
+		}
 	}
 });
 
-addEventListener("load", COMMENT_SNOB.load, false);
+chrome.extension.onRequest.addListener(function (request, sender, sendResponse) {
+	if (request.subject === "content_rules") {
+		console.log("background rules:");
+		console.log(request.rules);
+		
+		if (request.rules.length > 0){
+			chrome.pageAction.show(sender.tab.id);
+		}
+		else {
+			chrome.pageAction.hide(sender.tab.id);
+		}
+		
+		currentRules = request.rules;
+	}
+	else if (request.subject === "page_action_rules") {
+		console.log("page action almost rules:");
+		console.log(currentRules);
+		
+		var installedRules = COMMENT_SNOB.prefs.getJSONPref("rules", {});
+		
+		currentRules.forEach(function (el, i) {
+			if ("rule" in el && "id" in el.rule && el.rule.id in installedRules) {
+				currentRules[i].installed = true;
+			}
+			else {
+				currentRules[i].installed = false;
+			}
+		});
+		
+		sendResponse({ rules : currentRules });
+	}
+	else if (request.subject === "install_rule") {
+		if ("rule" in request.rule) {
+			COMMENT_SNOB.addRule(request.rule.rule);
+			
+			sendResponse({ status : true });
+		}
+		else if ("href" in request.rule) {
+			var req = new XMLHttpRequest();
+			req.open("GET", request.rule.href, true);
+			
+			req.onreadystatechange = function () {
+				if (req.readyState == 4) {
+					var text = JSON.minify(req.responseText);
+					
+					try {
+						var json = JSON.parse(text);
+						console.log(json);
+					} catch (e) {
+						console.log(e);
+						sendResponse({ status : false, msg : "Invalid JSON." });
+						return;
+					}
+					
+					COMMENT_SNOB.addRule(json);
+					sendResponse({ status : true });
+				}
+			};
+			
+			req.send(null);
+		}
+	}
+});
+
+COMMENT_SNOB.load();
